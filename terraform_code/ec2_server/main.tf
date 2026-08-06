@@ -12,8 +12,8 @@ provider "aws" {
 }
 
 # STEP1: CREATE SG
-resource "aws_security_group" "my-sg" {
-  name        = "JENKINS-SERVER-SG"
+resource "aws_security_group" "my-sg1" {
+  name        = "JENKINS-SERVER-SG1"
   description = "Jenkins Server Ports"
   
   # Port 22 is required for SSH Access
@@ -133,12 +133,18 @@ resource "aws_security_group" "my-sg" {
   }
 }
 
+# STEP1.5: CREATE KEY PAIR FROM LOCAL PUBLIC KEY
+resource "aws_key_pair" "my-key" {
+  key_name   = var.key_name
+  public_key = file("./Parvat.dev.pub")
+}
+
 # STEP2: CREATE EC2 USING PEM & SG
 resource "aws_instance" "my-ec2" {
   ami           = var.ami   
   instance_type = var.instance_type
-  key_name      = var.key_name        
-  vpc_security_group_ids = [aws_security_group.my-sg.id]
+  key_name      = aws_key_pair.my-key.key_name        
+  vpc_security_group_ids = [aws_security_group.my-sg1.id]
   
   root_block_device {
     volume_size = var.volume_size
@@ -153,7 +159,7 @@ resource "aws_instance" "my-ec2" {
     # ESTABLISHING SSH CONNECTION WITH EC2
     connection {
       type        = "ssh"
-      private_key = file("./Accn_2026.pem") # replace with your key-name 
+      private_key = file("./Parvat.dev.pem") # replace with your key-name 
       user        = "ubuntu"
       host        = self.public_ip
     }
@@ -219,16 +225,16 @@ resource "aws_instance" "my-ec2" {
       "sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd",
       "rm argocd-linux-amd64", 
 
-      # Install Java 17
-      # Ref: https://www.rosehosting.com/blog/how-to-install-java-17-lts-on-ubuntu-20-04/
+      # Install Java 21
       "sudo apt update -y",
-      "sudo apt install openjdk-17-jdk openjdk-17-jre -y",
+      "sudo apt install openjdk-21-jdk openjdk-21-jre -y",
       "java -version",
 
       # Install Jenkins
       # Ref: https://www.jenkins.io/doc/book/installing/linux/#debianubuntu
-      "sudo wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key",
-      "echo \"deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/\" | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null",
+      "sudo mkdir -p /etc/apt/keyrings",
+      "sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key",
+      "echo \"deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/\" | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null",
       "sudo apt-get update -y",
       "sudo apt-get install -y jenkins",
       "sudo systemctl start jenkins",

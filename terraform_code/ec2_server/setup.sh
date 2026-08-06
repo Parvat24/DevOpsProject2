@@ -36,17 +36,17 @@ echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.
 sudo apt-get update -y
 sudo apt-get install trivy -y
 
-# Install Java 17
-# REF: https://www.rosehosting.com/blog/how-to-install-java-17-lts-on-ubuntu-20-04/
+# Install Java 21
 sudo apt update -y
-sudo apt install openjdk-17-jdk openjdk-17-jre -y
+sudo apt install openjdk-21-jdk openjdk-21-jre -y
 java -version
 
 # Install Jenkins
 # REF: https://www.jenkins.io/doc/book/installing/linux/#debianubuntu
 
-sudo wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
-echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo mkdir -p /etc/apt/keyrings
+sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
 
 sudo apt update -y                                   # to update package
 sudo apt install jenkins -y                          # to install jenkins
