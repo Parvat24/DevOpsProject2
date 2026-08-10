@@ -1,9 +1,19 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "19.15.1"
+  version = "~> 20.0"
 
   cluster_name                   = local.name
   cluster_endpoint_public_access = true
+  enable_cluster_creator_admin_permissions = true
 
   cluster_addons = {
     coredns = {
